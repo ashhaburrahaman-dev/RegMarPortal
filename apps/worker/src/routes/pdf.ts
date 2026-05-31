@@ -2,11 +2,14 @@ import { Hono } from 'hono'
 import { requireAuth } from '../middleware/requireAuth.js'
 import { getMarriageById } from '../services/marriageService.js'
 import { generateCertificatePdf } from '../services/pdfService.js'
+import { PDF_COORDS } from '../config/pdfCoordinates.js'
 import type { Env } from '../types.js'
 
 const pdf = new Hono<{ Bindings: Env }>()
 
 pdf.use('*', requireAuth)
+
+const COORDS_KV_KEY = 'certificate:coords:v1'
 
 // ─── GET /api/v1/pdf/:id ──────────────────────────────────────────────────────
 pdf.get('/:id', async (c) => {
@@ -28,10 +31,21 @@ pdf.get('/:id', async (c) => {
   }
   const bgImageBytes = await r2Object.arrayBuffer()
 
-  // 3. Generate PDF
-  const pdfBytes = await generateCertificatePdf(marriage, marriage.persons, bgImageBytes)
+  // 3. Load coordinates — KV-saved coords override hardcoded defaults
+  let coords = PDF_COORDS as Record<string, { x: number; y: number; size: number }>
+  const cachedCoords = await c.env.PINCODE_CACHE.get(COORDS_KV_KEY)
+  if (cachedCoords) {
+    try {
+      coords = JSON.parse(cachedCoords)
+    } catch {
+      // Use defaults on parse error
+    }
+  }
 
-  // 4. Return as downloadable PDF
+  // 4. Generate PDF
+  const pdfBytes = await generateCertificatePdf(marriage, marriage.persons, bgImageBytes, coords)
+
+  // 5. Return as downloadable PDF
   const safeFilename = marriage.memoNumber.replace(/[^a-zA-Z0-9\-_]/g, '-')
   return new Response(pdfBytes, {
     status: 200,

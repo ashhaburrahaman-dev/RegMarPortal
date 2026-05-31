@@ -13,6 +13,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
+import { Route as AppCertificateDesignerRouteImport } from './routes/_app.certificate-designer'
 import { Route as AppMarriagesIndexRouteImport } from './routes/_app.marriages.index'
 import { Route as AppMarriagesSearchRouteImport } from './routes/_app.marriages.search'
 import { Route as AppMarriagesNewRouteImport } from './routes/_app.marriages.new'
@@ -36,6 +37,11 @@ const IndexRoute = IndexRouteImport.update({
 const AppDashboardRoute = AppDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCertificateDesignerRoute = AppCertificateDesignerRouteImport.update({
+  id: '/certificate-designer',
+  path: '/certificate-designer',
   getParentRoute: () => AppRoute,
 } as any)
 const AppMarriagesIndexRoute = AppMarriagesIndexRouteImport.update({
@@ -67,6 +73,7 @@ const AppMarriagesEditIdRoute = AppMarriagesEditIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/certificate-designer': typeof AppCertificateDesignerRoute
   '/dashboard': typeof AppDashboardRoute
   '/marriages/$id': typeof AppMarriagesIdRoute
   '/marriages/new': typeof AppMarriagesNewRoute
@@ -77,6 +84,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/certificate-designer': typeof AppCertificateDesignerRoute
   '/dashboard': typeof AppDashboardRoute
   '/marriages/$id': typeof AppMarriagesIdRoute
   '/marriages/new': typeof AppMarriagesNewRoute
@@ -89,6 +97,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
+  '/_app/certificate-designer': typeof AppCertificateDesignerRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/marriages/$id': typeof AppMarriagesIdRoute
   '/_app/marriages/new': typeof AppMarriagesNewRoute
@@ -101,6 +110,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/certificate-designer'
     | '/dashboard'
     | '/marriages/$id'
     | '/marriages/new'
@@ -111,6 +121,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/certificate-designer'
     | '/dashboard'
     | '/marriages/$id'
     | '/marriages/new'
@@ -122,6 +133,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_app'
     | '/login'
+    | '/_app/certificate-designer'
     | '/_app/dashboard'
     | '/_app/marriages/$id'
     | '/_app/marriages/new'
@@ -166,6 +178,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDashboardRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/certificate-designer': {
+      id: '/_app/certificate-designer'
+      path: '/certificate-designer'
+      fullPath: '/certificate-designer'
+      preLoaderRoute: typeof AppCertificateDesignerRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/marriages/': {
       id: '/_app/marriages/'
       path: '/marriages'
@@ -205,6 +224,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppRouteChildren {
+  AppCertificateDesignerRoute: typeof AppCertificateDesignerRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppMarriagesIdRoute: typeof AppMarriagesIdRoute
   AppMarriagesNewRoute: typeof AppMarriagesNewRoute
@@ -214,6 +234,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppCertificateDesignerRoute: AppCertificateDesignerRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppMarriagesIdRoute: AppMarriagesIdRoute,
   AppMarriagesNewRoute: AppMarriagesNewRoute,

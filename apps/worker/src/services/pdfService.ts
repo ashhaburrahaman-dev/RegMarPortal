@@ -5,6 +5,8 @@ import type { Marriage, Person } from '../db/schema.js'
 const A4_WIDTH = 595.28
 const A4_HEIGHT = 841.89
 
+export type CoordsMap = Record<string, { x: number; y: number; size: number }>
+
 /**
  * Formats a person's address as a single readable line.
  */
@@ -38,11 +40,14 @@ function wrapText(text: string, maxChars: number): string {
 /**
  * Generates a marriage certificate PDF using pdf-lib.
  * Background image is fetched from R2.
+ * Accepts dynamic `coords` map so the Certificate Designer can update field positions
+ * without a code change — defaults to the hardcoded PDF_COORDS if not provided.
  */
 export async function generateCertificatePdf(
   marriage: Marriage,
   personsList: Person[],
-  bgImageBytes: ArrayBuffer
+  bgImageBytes: ArrayBuffer,
+  coords: CoordsMap = PDF_COORDS as unknown as CoordsMap
 ): Promise<Uint8Array> {
   const pdfDoc = await PDFDocument.create()
   const page = pdfDoc.addPage([A4_WIDTH, A4_HEIGHT])
@@ -65,6 +70,9 @@ export async function generateCertificatePdf(
     })
   }
 
+  // Helper: get coords for a field key
+  const co = (key: string) => coords[key] ?? { x: 0, y: 0, size: 10 }
+
   // Helper to find person by role
   const byRole = (role: string) => personsList.find((p) => p.role === role)
 
@@ -75,63 +83,96 @@ export async function generateCertificatePdf(
   const witness2 = byRole('WITNESS2')
 
   // ── Header fields ─────────────────────────────────────────────────────────
-  drawText(marriage.memoNumber, PDF_COORDS.memoNumber.x, PDF_COORDS.memoNumber.y, PDF_COORDS.memoNumber.size, true)
-  drawText(marriage.marriageDate, PDF_COORDS.marriageDate.x, PDF_COORDS.marriageDate.y, PDF_COORDS.marriageDate.size)
-  drawText(marriage.registrationDate, PDF_COORDS.registrationDate.x, PDF_COORDS.registrationDate.y, PDF_COORDS.registrationDate.size)
-  drawText(marriage.regBookNo, PDF_COORDS.regBookNo.x, PDF_COORDS.regBookNo.y, PDF_COORDS.regBookNo.size)
-  drawText(marriage.pageNo, PDF_COORDS.pageNo.x, PDF_COORDS.pageNo.y, PDF_COORDS.pageNo.size)
-  drawText(String(marriage.regYear), PDF_COORDS.regYear.x, PDF_COORDS.regYear.y, PDF_COORDS.regYear.size)
+  const mn = co('memoNumber')
+  drawText(marriage.memoNumber, mn.x, mn.y, mn.size, true)
+
+  const md = co('marriageDate')
+  drawText(marriage.marriageDate, md.x, md.y, md.size)
+
+  const rd = co('registrationDate')
+  drawText(marriage.registrationDate, rd.x, rd.y, rd.size)
+
+  const rb = co('regBookNo')
+  drawText(marriage.regBookNo, rb.x, rb.y, rb.size)
+
+  const pn = co('pageNo')
+  drawText(marriage.pageNo, pn.x, pn.y, pn.size)
+
+  const ry = co('regYear')
+  drawText(String(marriage.regYear), ry.x, ry.y, ry.size)
 
   // ── Groom ─────────────────────────────────────────────────────────────────
   if (groom) {
-    drawText(groom.fullName, PDF_COORDS.groomName.x, PDF_COORDS.groomName.y, PDF_COORDS.groomName.size, true)
+    const gn = co('groomName')
+    drawText(groom.fullName, gn.x, gn.y, gn.size, true)
     if (groom.fatherName) {
-      drawText(`S/O: ${groom.fatherName}`, PDF_COORDS.groomFatherName.x, PDF_COORDS.groomFatherName.y, PDF_COORDS.groomFatherName.size)
+      const gf = co('groomFatherName')
+      drawText(`S/O: ${groom.fatherName}`, gf.x, gf.y, gf.size)
     }
-    drawText(wrapText(formatAddress(groom), 70), PDF_COORDS.groomAddress.x, PDF_COORDS.groomAddress.y, PDF_COORDS.groomAddress.size)
+    const ga = co('groomAddress')
+    drawText(wrapText(formatAddress(groom), 70), ga.x, ga.y, ga.size)
   }
 
   // ── Bride ─────────────────────────────────────────────────────────────────
   if (bride) {
-    drawText(bride.fullName, PDF_COORDS.brideName.x, PDF_COORDS.brideName.y, PDF_COORDS.brideName.size, true)
+    const bn = co('brideName')
+    drawText(bride.fullName, bn.x, bn.y, bn.size, true)
     if (bride.fatherName) {
-      drawText(`D/O: ${bride.fatherName}`, PDF_COORDS.brideFatherName.x, PDF_COORDS.brideFatherName.y, PDF_COORDS.brideFatherName.size)
+      const bf = co('brideFatherName')
+      drawText(`D/O: ${bride.fatherName}`, bf.x, bf.y, bf.size)
     }
-    drawText(wrapText(formatAddress(bride), 70), PDF_COORDS.brideAddress.x, PDF_COORDS.brideAddress.y, PDF_COORDS.brideAddress.size)
+    const ba = co('brideAddress')
+    drawText(wrapText(formatAddress(bride), 70), ba.x, ba.y, ba.size)
   }
 
   // ── Wakil ─────────────────────────────────────────────────────────────────
   if (wakil) {
-    drawText(wakil.fullName, PDF_COORDS.wakilName.x, PDF_COORDS.wakilName.y, PDF_COORDS.wakilName.size)
+    const wn = co('wakilName')
+    drawText(wakil.fullName, wn.x, wn.y, wn.size)
     if (wakil.fatherName) {
-      drawText(`S/O: ${wakil.fatherName}`, PDF_COORDS.wakilFatherName.x, PDF_COORDS.wakilFatherName.y, PDF_COORDS.wakilFatherName.size)
+      const wf = co('wakilFatherName')
+      drawText(`S/O: ${wakil.fatherName}`, wf.x, wf.y, wf.size)
     }
-    drawText(wrapText(formatAddress(wakil), 70), PDF_COORDS.wakilAddress.x, PDF_COORDS.wakilAddress.y, PDF_COORDS.wakilAddress.size)
+    const wa = co('wakilAddress')
+    drawText(wrapText(formatAddress(wakil), 70), wa.x, wa.y, wa.size)
   }
 
   // ── Witness 1 ─────────────────────────────────────────────────────────────
   if (witness1) {
-    drawText(witness1.fullName, PDF_COORDS.witness1Name.x, PDF_COORDS.witness1Name.y, PDF_COORDS.witness1Name.size)
+    const w1n = co('witness1Name')
+    drawText(witness1.fullName, w1n.x, w1n.y, w1n.size)
     if (witness1.fatherName) {
-      drawText(`S/O: ${witness1.fatherName}`, PDF_COORDS.witness1FatherName.x, PDF_COORDS.witness1FatherName.y, PDF_COORDS.witness1FatherName.size)
+      const w1f = co('witness1FatherName')
+      drawText(`S/O: ${witness1.fatherName}`, w1f.x, w1f.y, w1f.size)
     }
-    drawText(wrapText(formatAddress(witness1), 35), PDF_COORDS.witness1Address.x, PDF_COORDS.witness1Address.y, PDF_COORDS.witness1Address.size)
+    const w1a = co('witness1Address')
+    drawText(wrapText(formatAddress(witness1), 35), w1a.x, w1a.y, w1a.size)
   }
 
   // ── Witness 2 ─────────────────────────────────────────────────────────────
   if (witness2) {
-    drawText(witness2.fullName, PDF_COORDS.witness2Name.x, PDF_COORDS.witness2Name.y, PDF_COORDS.witness2Name.size)
+    const w2n = co('witness2Name')
+    drawText(witness2.fullName, w2n.x, w2n.y, w2n.size)
     if (witness2.fatherName) {
-      drawText(`S/O: ${witness2.fatherName}`, PDF_COORDS.witness2FatherName.x, PDF_COORDS.witness2FatherName.y, PDF_COORDS.witness2FatherName.size)
+      const w2f = co('witness2FatherName')
+      drawText(`S/O: ${witness2.fatherName}`, w2f.x, w2f.y, w2f.size)
     }
-    drawText(wrapText(formatAddress(witness2), 35), PDF_COORDS.witness2Address.x, PDF_COORDS.witness2Address.y, PDF_COORDS.witness2Address.size)
+    const w2a = co('witness2Address')
+    drawText(wrapText(formatAddress(witness2), 35), w2a.x, w2a.y, w2a.size)
   }
 
   // ── Financial details ─────────────────────────────────────────────────────
-  drawText(`₹ ${marriage.dowerAmount.toLocaleString('en-IN')}`, PDF_COORDS.dowerAmount.x, PDF_COORDS.dowerAmount.y, PDF_COORDS.dowerAmount.size)
-  drawText(marriage.paymentMethod, PDF_COORDS.paymentMethod.x, PDF_COORDS.paymentMethod.y, PDF_COORDS.paymentMethod.size)
-  drawText(`₹ ${marriage.promptAmount.toLocaleString('en-IN')}`, PDF_COORDS.promptAmount.x, PDF_COORDS.promptAmount.y, PDF_COORDS.promptAmount.size)
-  drawText(`₹ ${marriage.deferredAmount.toLocaleString('en-IN')}`, PDF_COORDS.deferredAmount.x, PDF_COORDS.deferredAmount.y, PDF_COORDS.deferredAmount.size)
+  const da = co('dowerAmount')
+  drawText(`₹ ${marriage.dowerAmount.toLocaleString('en-IN')}`, da.x, da.y, da.size)
+
+  const pm = co('paymentMethod')
+  drawText(marriage.paymentMethod, pm.x, pm.y, pm.size)
+
+  const pa = co('promptAmount')
+  drawText(`₹ ${marriage.promptAmount.toLocaleString('en-IN')}`, pa.x, pa.y, pa.size)
+
+  const dfa = co('deferredAmount')
+  drawText(`₹ ${marriage.deferredAmount.toLocaleString('en-IN')}`, dfa.x, dfa.y, dfa.size)
 
   return pdfDoc.save()
 }

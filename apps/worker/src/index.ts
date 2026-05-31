@@ -7,6 +7,7 @@ import marriageRoutes from './routes/marriages.js'
 import memoRoutes from './routes/memo.js'
 import pincodeRoutes from './routes/pincode.js'
 import pdfRoutes from './routes/pdf.js'
+import certificateRoutes from './routes/certificate.js'
 
 const app = new Hono<{ Bindings: Env }>()
 
@@ -36,6 +37,7 @@ app.route('/api/v1/marriages', marriageRoutes)
 app.route('/api/v1/memo', memoRoutes)
 app.route('/api/v1/pincode', pincodeRoutes)
 app.route('/api/v1/pdf', pdfRoutes)
+app.route('/api/v1/certificate', certificateRoutes)
 
 // ─── 404 / Error handlers ─────────────────────────────────────────────────────
 app.notFound((c) => c.json({ error: 'Not found' }, 404))

@@ -5,6 +5,7 @@ import {
   FilePlus,
   Search,
   BookOpen,
+  FileCode2,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -17,21 +18,31 @@ const navItems = [
     label: 'Dashboard',
     to: '/dashboard',
     icon: LayoutDashboard,
+    adminOnly: false,
   },
   {
     label: 'Marriages',
     to: '/marriages',
     icon: ScrollText,
+    adminOnly: false,
   },
   {
     label: 'New Entry',
     to: '/marriages/new',
     icon: FilePlus,
+    adminOnly: false,
   },
   {
     label: 'Search',
     to: '/marriages/search',
     icon: Search,
+    adminOnly: false,
+  },
+  {
+    label: 'Cert. Designer',
+    to: '/certificate-designer',
+    icon: FileCode2,
+    adminOnly: true,
   },
 ]
 
@@ -56,7 +67,7 @@ export function Sidebar({ role }: SidebarProps) {
 
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-1">
-        {navItems.map((item) => {
+        {navItems.filter(item => !item.adminOnly || role === 'ADMIN').map((item) => {
           const Icon = item.icon
           const isActive = pathname === item.to || (item.to !== '/dashboard' && pathname.startsWith(item.to + '/')) || (item.to === '/marriages' && pathname === '/marriages')
           return (
