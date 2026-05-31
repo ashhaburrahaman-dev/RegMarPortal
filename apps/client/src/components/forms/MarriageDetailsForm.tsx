@@ -23,7 +23,7 @@ export function MarriageDetailsForm({ editId }: MarriageDetailsFormProps) {
   const regYear = useWatch({ control, name: 'regYear' })
   const dowerAmount = useWatch({ control, name: 'dowerAmount' })
   const paymentMethod = useWatch({ control, name: 'paymentMethod' })
-  const deferredAmount = useWatch({ control, name: 'deferredAmount' })
+  const promptAmount = useWatch({ control, name: 'promptAmount' })
   const memoNumber = useWatch({ control, name: 'memoNumber' })
 
   // Auto-generate memo number from regBookNo + pageNo + regYear
@@ -34,19 +34,19 @@ export function MarriageDetailsForm({ editId }: MarriageDetailsFormProps) {
     }
   }, [regBookNo, pageNo, regYear, setValue])
 
-  // Auto-calculate promptAmount
+  // Auto-calculate deferredAmount
   useEffect(() => {
     const dower = Number(dowerAmount) || 0
-    const deferred = Number(deferredAmount) || 0
+    const prompt = Number(promptAmount) || 0
 
     if (paymentMethod === 'CASH') {
       setValue('deferredAmount', 0, { shouldValidate: false })
       setValue('promptAmount', dower, { shouldValidate: false })
     } else if (paymentMethod === 'DEFERRED') {
-      const prompt = Math.max(0, dower - deferred)
-      setValue('promptAmount', prompt, { shouldValidate: false })
+      const deferred = Math.max(0, dower - prompt)
+      setValue('deferredAmount', deferred, { shouldValidate: false })
     }
-  }, [dowerAmount, paymentMethod, deferredAmount, setValue])
+  }, [dowerAmount, paymentMethod, promptAmount, setValue])
 
   // Memo validation
   const {
@@ -241,40 +241,43 @@ export function MarriageDetailsForm({ editId }: MarriageDetailsFormProps) {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Deferred Amount — only shown for DEFERRED */}
-          {paymentMethod === 'DEFERRED' && (
-            <div className="space-y-1.5">
-              <Label htmlFor="deferredAmount">
-                Deferred Amount (₹) <span className="text-red-400">*</span>
-              </Label>
-              <Input
-                id="deferredAmount"
-                type="number"
-                step="0.01"
-                min="0"
-                {...register('deferredAmount', { valueAsNumber: true })}
-                placeholder="0.00"
-              />
-              {errors.deferredAmount && (
-                <p className="text-xs text-red-400">{errors.deferredAmount.message}</p>
-              )}
-            </div>
-          )}
-
-          {/* Prompt Amount — auto-calculated, read-only */}
+          {/* Prompt Amount: writable if DEFERRED, read-only if CASH */}
           <div className="space-y-1.5">
             <Label htmlFor="promptAmount">
-              Prompt Amount (₹)
-              <span className="ml-1.5 text-xs text-zinc-500">(auto-calculated)</span>
+              Prompt Amount (₹) {paymentMethod === 'DEFERRED' && <span className="text-red-400">*</span>}
+              {paymentMethod === 'CASH' && <span className="ml-1.5 text-xs text-zinc-500">(equals total dower)</span>}
             </Label>
             <Input
               id="promptAmount"
               type="number"
+              step="0.01"
+              min="0"
               {...register('promptAmount', { valueAsNumber: true })}
-              readOnly
-              className="bg-zinc-800/40 text-emerald-300 cursor-default"
+              readOnly={paymentMethod === 'CASH'}
+              className={paymentMethod === 'CASH' ? 'bg-zinc-800/40 text-emerald-300 cursor-default' : ''}
+              placeholder="0.00"
             />
+            {errors.promptAmount && (
+              <p className="text-xs text-red-400">{errors.promptAmount.message}</p>
+            )}
           </div>
+
+          {/* Deferred Amount: auto-calculated, read-only */}
+          {paymentMethod === 'DEFERRED' && (
+            <div className="space-y-1.5">
+              <Label htmlFor="deferredAmount">
+                Deferred Amount (₹)
+                <span className="ml-1.5 text-xs text-zinc-500">(auto-calculated)</span>
+              </Label>
+              <Input
+                id="deferredAmount"
+                type="number"
+                {...register('deferredAmount', { valueAsNumber: true })}
+                readOnly
+                className="bg-zinc-800/40 text-indigo-300 cursor-default"
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>

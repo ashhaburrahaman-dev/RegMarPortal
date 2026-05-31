@@ -25,26 +25,26 @@ export const MarriageCreateSchema = z
   })
   .superRefine((data, ctx) => {
     if (data.paymentMethod === 'DEFERRED') {
-      if (data.deferredAmount <= 0) {
+      if (data.promptAmount <= 0) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: 'Deferred amount must be greater than 0',
-          path: ['deferredAmount'],
-        })
-      }
-      if (data.deferredAmount >= data.dowerAmount) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: 'Deferred amount must be less than the total dower amount',
-          path: ['deferredAmount'],
-        })
-      }
-      const expected = data.dowerAmount - data.deferredAmount
-      if (Math.abs(data.promptAmount - expected) > 0.01) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: 'Prompt amount must equal dower amount minus deferred amount',
+          message: 'Prompt amount must be greater than 0',
           path: ['promptAmount'],
+        })
+      }
+      if (data.promptAmount >= data.dowerAmount) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Prompt amount must be less than the total dower amount',
+          path: ['promptAmount'],
+        })
+      }
+      const expected = data.dowerAmount - data.promptAmount
+      if (Math.abs(data.deferredAmount - expected) > 0.01) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Deferred amount must equal dower amount minus prompt amount',
+          path: ['deferredAmount'],
         })
       }
     }
@@ -54,6 +54,13 @@ export const MarriageCreateSchema = z
           code: z.ZodIssueCode.custom,
           message: 'Prompt amount must equal dower amount for cash payment',
           path: ['promptAmount'],
+        })
+      }
+      if (Math.abs(data.deferredAmount) > 0.01) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Deferred amount must be 0 for cash payment',
+          path: ['deferredAmount'],
         })
       }
     }
