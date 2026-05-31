@@ -53,9 +53,11 @@ async function request<T>(
   })
 
   if (response.status === 401) {
-    // Redirect to login if unauthenticated
-    window.location.href = '/login'
-    throw new ApiError(401, 'Session expired — redirecting to login')
+    // Only redirect to login if we are not already on the login page
+    if (window.location.pathname !== '/login') {
+      window.location.href = '/login'
+    }
+    throw new ApiError(401, 'Session expired')
   }
 
   if (!response.ok) {
@@ -96,7 +98,9 @@ export async function fetchBlob(path: string): Promise<{ blob: Blob; filename: s
   })
 
   if (response.status === 401) {
-    window.location.href = '/login'
+    if (window.location.pathname !== '/login') {
+      window.location.href = '/login'
+    }
     throw new ApiError(401, 'Session expired')
   }
 
