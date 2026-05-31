@@ -34,13 +34,14 @@ jobs:
         run: pnpm --filter @regmar/shared build
 
       - name: Run D1 migrations (remote)
-        run: pnpm --filter @regmar/worker wrangler d1 migrations apply marriage-registry --remote
+        run: pnpm --filter @regmar/worker exec wrangler d1 migrations apply marriage-registry --remote
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       - name: Deploy Worker
-        run: pnpm --filter @regmar/worker wrangler deploy
+        run: pnpm --filter @regmar/worker exec wrangler deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
