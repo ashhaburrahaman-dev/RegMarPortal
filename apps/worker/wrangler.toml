@@ -1,0 +1,28 @@
+name = "marriage-worker"
+main = "src/index.ts"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+ENVIRONMENT = "production"
+ALLOWED_ORIGIN = "https://marriage-client.pages.dev"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "marriage-registry"
+database_id = "89630b3c-24a5-4f7b-8423-de92e0876b3f"
+
+[[r2_buckets]]
+binding = "ASSETS"
+bucket_name = "marriage-assets"
+
+[[kv_namespaces]]
+binding = "PINCODE_CACHE"
+id = "11081f1625a14f1997d95014cbcfefef"
+
+# Secrets — set via: wrangler secret put SECRET_NAME
+# JWT_SECRET
+
+[dev]
+port = 8787
+local_protocol = "http"

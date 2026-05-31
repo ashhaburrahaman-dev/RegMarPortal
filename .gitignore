@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+dist/
+build/
+.turbo/
+*.tsbuildinfo
+
+# Wrangler
+.wrangler/
+.dev.vars
+
+# Environment
+.env
+.env.local
+secret
+
+.env.production
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/settings.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Test artifacts
+coverage/
