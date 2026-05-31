@@ -112,7 +112,7 @@ export function PersonForm({ role, index, label }: PersonFormProps) {
         {/* Post Office — dropdown populated from pincode API */}
         <div className="space-y-1.5">
           <Label htmlFor={`person-${index}-po`}>Post Office</Label>
-          {pincodeData?.postOffices.length ? (
+          {pincodeData?.postOffices?.length ? (
             <Select
               onValueChange={(val) =>
                 setValue(`persons.${index}.postOffice`, val, { shouldValidate: true })

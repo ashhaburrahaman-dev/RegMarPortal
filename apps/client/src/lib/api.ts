@@ -80,7 +80,16 @@ async function request<T>(
   // Handle 204 No Content
   if (response.status === 204) return undefined as T
 
-  return response.json() as Promise<T>
+  const text = await response.text()
+  if (!text || text.trim() === 'null' || text.trim() === '') {
+    return null as unknown as T
+  }
+
+  try {
+    return JSON.parse(text) as T
+  } catch {
+    throw new ApiError(response.status, 'Invalid JSON response')
+  }
 }
 
 /**
