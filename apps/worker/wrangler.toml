@@ -5,7 +5,7 @@ compatibility_flags = ["nodejs_compat"]
 
 [vars]
 ENVIRONMENT = "production"
-ALLOWED_ORIGIN = "https://marriage-client.pages.dev"
+ALLOWED_ORIGIN = "https://marriage-client-6qf.pages.dev"
 
 [[d1_databases]]
 binding = "DB"
