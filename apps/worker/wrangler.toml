@@ -10,7 +10,7 @@ ALLOWED_ORIGIN = "https://marriage-client.pages.dev"
 [[d1_databases]]
 binding = "DB"
 database_name = "marriage-registry"
-database_id = "89630b3c-24a5-4f7b-8423-de92e0876b3f"
+database_id = "95564952-6660-43a4-b25a-9c7d2e35f4e6"
 
 [[r2_buckets]]
 binding = "ASSETS"
@@ -18,7 +18,7 @@ bucket_name = "marriage-assets"
 
 [[kv_namespaces]]
 binding = "PINCODE_CACHE"
-id = "11081f1625a14f1997d95014cbcfefef"
+id = "3a84a831372541f7a7b9ab5d565f6187"
 
 # Secrets — set via: wrangler secret put SECRET_NAME
 # JWT_SECRET
