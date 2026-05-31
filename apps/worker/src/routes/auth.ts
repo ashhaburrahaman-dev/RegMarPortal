@@ -12,7 +12,7 @@ import type { Env } from '../types.js'
 const COOKIE_OPTIONS = {
   httpOnly: true,
   secure: true,
-  sameSite: 'Strict' as const,
+  sameSite: 'None' as const,
   maxAge: 28800, // 8 hours
   path: '/',
 }
