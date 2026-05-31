@@ -163,7 +163,8 @@ function CertificateDesignerPage() {
       setDragging(fieldKey)
 
       const rect = canvasRef.current!.getBoundingClientRect()
-      const field = coords![fieldKey]
+      const field = coords?.[fieldKey]
+      if (!field) return
       const { left, top } = pdfToDisplay(field.x, field.y)
 
       dragOffset.current = {
@@ -186,7 +187,10 @@ function CertificateDesignerPage() {
       const top = Math.max(0, Math.min(DISPLAY_H - 20, rawTop))
 
       const { x, y } = displayToPdf(left, top)
-      setCoords((prev) => ({ ...prev!, [dragging]: { ...prev![dragging], x, y } }))
+      setCoords((prev) => ({
+        ...prev!,
+        [dragging]: { ...(prev![dragging] ?? {}), x, y } as FieldCoord,
+      }))
     },
     [dragging, coords]
   )
@@ -329,7 +333,7 @@ function CertificateDesignerPage() {
                             const val = Number(e.target.value)
                             setCoords((prev) => ({
                               ...prev!,
-                              [selectedField]: { ...prev![selectedField], [prop]: val },
+                              [selectedField]: { ...(prev![selectedField] ?? {}), [prop]: val } as FieldCoord,
                             }))
                           }}
                           className="w-full bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-sm text-white focus:outline-none focus:border-indigo-500"
@@ -367,7 +371,7 @@ function CertificateDesignerPage() {
                   />
                   {FIELD_LABELS[key] ?? key}
                   <span className="ml-auto font-mono text-zinc-600">
-                    {coords[key].x},{coords[key].y}
+                    {coords[key]!.x},{coords[key]!.y}
                   </span>
                 </button>
               )
