@@ -18,7 +18,7 @@ pincode.get('/:pincode', async (c) => {
   const result = await lookupPincode(c.env, pin)
 
   if (!result) {
-    return c.json({ error: 'Pincode not found or API unavailable' }, 404)
+    return c.json(null, 200)
   }
 
   return c.json(result)
