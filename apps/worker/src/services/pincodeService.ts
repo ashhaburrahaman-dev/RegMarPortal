@@ -35,22 +35,33 @@ export async function lookupPincode(env: Env, pincode: string): Promise<PincodeR
     }
   }
 
-  // 2. Fetch from postal API
-  const response = await fetch(`https://api.postalpincode.in/pincode/${pincode}`, {
-    headers: { Accept: 'application/json' },
-  })
+  // 2. Fetch from postal API with standard User-Agent to prevent bot-blocking
+  let apiResult
+  try {
+    const response = await fetch(`https://api.postalpincode.in/pincode/${pincode}`, {
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      },
+    })
 
-  if (!response.ok) {
+    if (!response.ok) {
+      console.error('[Pincode API Error] Response status:', response.status)
+      return null
+    }
+
+    const data = (await response.json()) as Array<{
+      Status: string
+      Message: string
+      PostOffice: PostOffice[] | null
+    }>
+
+    apiResult = data[0]
+  } catch (err) {
+    console.error('[Pincode API Fetch Failed]', err)
     return null
   }
 
-  const data = (await response.json()) as Array<{
-    Status: string
-    Message: string
-    PostOffice: PostOffice[] | null
-  }>
-
-  const apiResult = data[0]
   if (!apiResult || apiResult.Status !== 'Success' || !apiResult.PostOffice?.length) {
     return null
   }
